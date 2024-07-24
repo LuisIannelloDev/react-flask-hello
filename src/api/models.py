@@ -5,8 +5,8 @@ db = SQLAlchemy()
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=False, nullable=False)
-    is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    password = db.Column(db.String(80), nullable=False)
+    is_active = db.Column(db.Boolean(), nullable=False)
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -15,5 +15,21 @@ class User(db.Model):
         return {
             "id": self.id,
             "email": self.email,
-            # do not serialize the password, its a security breach
+            # do not serialize the password, it's a security breach
         }
+
+class Planeta(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(80), nullable=False)
+    descripcion = db.Column(db.Text, nullable=True)
+
+class Personaje(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(80), nullable=False)
+    descripcion = db.Column(db.Text, nullable=True)
+
+class Favorito(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    planeta_id = db.Column(db.Integer, db.ForeignKey('planeta.id'), nullable=True)
+    personaje_id = db.Column(db.Integer, db.ForeignKey('personaje.id'), nullable=True)

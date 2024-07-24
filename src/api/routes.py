@@ -1,22 +1,29 @@
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
-from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User
-from api.utils import generate_sitemap, APIException
-from flask_cors import CORS
+from flask import Blueprint, request, jsonify
+from api.models import db, Planeta, Personaje, Favorito
 
 api = Blueprint('api', __name__)
 
-# Allow CORS requests to this API
-CORS(api)
+@api.route('/planetas', methods=['GET'])
+def listar_planetas():
+    planetas = Planeta.query.all()
+    return jsonify([planeta.nombre for planeta in planetas])
 
+@api.route('/personajes', methods=['GET'])
+def listar_personajes():
+    personajes = Personaje.query.all()
+    return jsonify([personaje.nombre for personaje in personajes])
 
-@api.route('/hello', methods=['POST', 'GET'])
-def handle_hello():
+@api.route('/favoritos', methods=['POST'])
+def agregar_favorito():
+    data = request.json
+    favorito = Favorito(user_id=data['user_id'], planeta_id=data.get('planeta_id'), personaje_id=data.get('personaje_id'))
+    db.session.add(favorito)
+    db.session.commit()
+    return jsonify({"message": "Favorito agregado exitosamente"}), 201
 
-    response_body = {
-        "message": "Hello! I'm a message that came from the backend, check the network tab on the google inspector and you will see the GET request"
-    }
-
-    return jsonify(response_body), 200
+@api.route('/favoritos/<int:favorito_id>', methods=['DELETE'])
+def eliminar_favorito(favorito_id):
+    favorito = Favorito.query.get_or_404(favorito_id)
+    db.session.delete(favorito)
+    db.session.commit()
+    return jsonify({"message": "Favorito eliminado exitosamente"})
